@@ -1,0 +1,236 @@
+-- Modelo Físico do DW de Servidores
+-- Gerado em 28/05/2017
+CREATE TABLE servidor (
+	id_servidor_portal INTEGER PRIMARY KEY,
+	nome TEXT,
+	cpf TEXT,
+	matricula TEXT
+);
+
+CREATE TABLE orgao (
+	cod_orgao BIGINT PRIMARY KEY,
+	descricao TEXT
+);
+
+CREATE TABLE tempo (
+	ano BIGINT, 
+	mes BIGINT,
+PRIMARY KEY (ano, mes)
+);
+
+CREATE TABLE cargo (
+	cod_cargo BIGINT PRIMARY KEY,
+	descricao_cargo TEXT
+);
+
+CREATE TABLE funcao (
+	cod_atividade BIGINT PRIMARY KEY,
+	sigla TEXT,
+	nivel_funcao BIGINT,
+	funcao TEXT,
+	opcao_parcial TEXT
+);
+
+CREATE TABLE vinculo (
+	cod_vinculo BIGINT PRIMARY KEY,
+	tipo TEXT,
+	situacao TEXT
+);
+
+CREATE TABLE carreira (
+	cod_carreira BIGINT PRIMARY KEY,
+	classe TEXT,
+	referencia TEXT,
+	nivel TEXT,
+	cod_cargo BIGINT,
+FOREIGN KEY(cod_cargo) REFERENCES cargo (cod_cargo)
+
+);
+
+CREATE TABLE observacao (
+	id_servidor_portal BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	descricao TEXT,
+PRIMARY KEY (id_servidor_portal, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano)
+);
+
+CREATE TABLE honorarios (
+	id_servidor_portal BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	empresa TEXT,
+	valor DECIMAL,
+PRIMARY KEY (id_servidor_portal, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano)
+);
+
+CREATE TABLE afastamento (
+	id_servidor_portal BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	data_inicio DATE,
+	data_fim DATE,
+PRIMARY KEY (id_servidor_portal, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano)
+);
+
+CREATE TABLE fato_cargo (
+	cod_carreira BIGINT,
+	cod_cargo BIGINT,
+	id_servidor_portal BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	cod_uorg BIGINT,
+	cod_org BIGINT,
+	cod_org_sup BIGINT,
+	regime_juridico TEXT,
+	uf_exercicio TEXT,
+	jornada_de_trabalho TEXT,
+PRIMARY KEY (cod_carreira, cod_cargo, id_servidor_portal, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano),
+FOREIGN KEY (cod_carreira) REFERENCES carreira(cod_carreira),
+FOREIGN KEY (cod_cargo) REFERENCES cargo (cod_cargo)
+);
+
+CREATE TABLE fato_vinculo (
+	id_servidor_portal BIGINT,
+	cod_vinculo BIGINT,
+	cod_uorg BIGINT,
+	cod_org BIGINT,
+	cod_org_sup BIGINT,
+	regime_juridico TEXT,
+	uf_exercicio TEXT,
+	jornada_de_trabalho TEXT,
+PRIMARY KEY (id_servidor_portal, cod_vinculo),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (cod_vinculo) REFERENCES vinculo (cod_vinculo)	
+);
+
+CREATE TABLE fato_funcao (
+	id_servidor_portal BIGINT,
+	cod_atividade BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	cod_uorg BIGINT,
+	cod_org BIGINT,
+	cod_org_sup BIGINT,
+	regime_juridico TEXT,
+	uf_exercicio TEXT,
+	jornada_de_trabalho TEXT,
+PRIMARY KEY (id_servidor_portal, cod_atividade, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (cod_atividade) REFERENCES funcao (cod_atividade),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano)
+);
+
+CREATE TABLE fato_sem_cargo_funcao_vinculo (
+	id_servidor_portal BIGINT PRIMARY KEY,
+	cod_uorg BIGINT,
+	cod_org BIGINT,
+	cod_org_sup BIGINT,
+	regime_juridico TEXT,
+	uf_exercicio TEXT,
+	jornada_de_trabalho TEXT,
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor(id_servidor_portal)
+
+);
+
+CREATE TABLE fato_remuneracao (
+	id_servidor_portal BIGINT,
+	mes BIGINT,
+	ano BIGINT,
+	remuneracao_basica_bruta_dolar DECIMAL,
+	abate_teto_real DECIMAL,
+	abate_teto_dolar DECIMAL,
+	gratificacao_natalina_real DECIMAL,
+	gratificacao_natalina_dolar DECIMAL,
+	abate_teto_gratificacao_natal_real DECIMAL,
+	abate_teto_gratificacao_natal_dolar DECIMAL,
+	ferias_real DECIMAL,
+	ferias_dolar DECIMAL,
+	outras_remuneracoes_eventuais_real DECIMAL,
+	outras_remuneracoes_eventuais_dolar DECIMAL,
+	irrf_real DECIMAL,
+	irrf_dolar DECIMAL,
+	pss_rpgs_real DECIMAL,
+	pss_rpgs_dolar DECIMAL,
+	pensao_militar_real DECIMAL,
+	pensao_militar_dolar DECIMAL,
+	fundo_de_saude_real DECIMAL,
+	fundo_de_saude_dolar DECIMAL,
+	demais_deducoes_real DECIMAL,
+	demais_deducoes_dolar DECIMAL,
+	remuneracao_apos_deducoes_obrigatorias_real DECIMAL,
+	remuneracao_apos_deducoes_obrigatorias_dolar DECIMAL,
+	verbas_indenizatorias_de_pessoal_civil_real DECIMAL,
+	verbas_indenizatorias_de_pessoal_civil_dolar DECIMAL,
+	verbas_indenizatorias_de_pessoal_militar_real DECIMAL,
+	verbas_indenizatorias_de_pessoal_militar_dolar DECIMAL,
+	total_de_honorarios_jetons DECIMAL,
+	remuneracao_basica_bruta_real DECIMAL,
+PRIMARY KEY (id_servidor_portal, mes, ano),
+FOREIGN KEY (id_servidor_portal) REFERENCES servidor (id_servidor_portal),
+FOREIGN KEY (mes,ano) REFERENCES tempo (mes,ano)
+);
+
+
+--Criação dos Indices
+
+create index idx_btree_vinculo on vinculo using btree(cod_vinculo);
+create index idx_btree_funcao on funcao using btree(cod_atividade);
+create index idx_btree_carreira on carreira using btree(cod_carreira);
+create index idx_btree_cargo on cargo using btree(cod_cargo);
+create index idx_btree_orgao on orgao using btree(cod_orgao);
+create index idx_btree_tempo on tempo using btree(mes,ano);
+create index idx_btree_servidor on servidor using btree(id_servidor_portal);
+create index idx_btree_afastamento on afastamento using btree(id_servidor_portal,mes,ano);
+create index idx_btree_honorarios on honorarios using btree(id_servidor_portal,mes,ano);
+create index idx_btree_observacao on observacao using btree(id_servidor_portal,mes,ano);
+create index idx_btree_fato_sem_cargo_funcao_vinculo on fato_sem_cargo_funcao_vinculo using btree(id_servidor_portal);
+create index idx_btree_fato_vinculo on fato_vinculo using btree(id_servidor_portal,cod_vinculo);
+create index idx_btree_fato_cargo on fato_cargo using btree(cod_carreira,cod_cargo,id_servidor_portal,mes,ano);
+create index idx_btree_fato_remuneracao on fato_remuneracao using btree(id_servidor_portal,mes,ano);
+create index idx_btree_fato_funcao on fato_funcao using btree(id_servidor_portal,cod_atividade,mes,ano);
+
+-- Clustering
+
+cluster vinculo using idx_btree_vinculo;
+cluster funcao using idx_btree_funcao;
+cluster carreira using idx_btree_carreira;
+cluster cargo using idx_btree_cargo;
+cluster orgao using idx_btree_orgao;
+cluster tempo using idx_btree_tempo;
+cluster servidor using idx_btree_servidor;
+cluster afastamento using idx_btree_afastamento;
+cluster honorarios using idx_btree_honorarios;
+cluster observacao using idx_btree_observacao;
+cluster fato_sem_cargo_funcao_vinculo using idx_btree_fato_sem_cargo_funcao_vinculo;
+cluster fato_vinculo using idx_btree_fato_vinculo;
+cluster fato_cargo using idx_btree_fato_cargo;
+cluster fato_remuneracao using idx_btree_fato_remuneracao;
+cluster fato_funcao using idx_btree_fato_funcao;
+
+
+-- Adição das chaves estrangeiras nas tabelas referentes a tabela orgao
+
+ALTER TABLE fato_funcao ADD FOREIGN KEY(cod_uorg) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_funcao ADD FOREIGN KEY(cod_org) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_funcao ADD FOREIGN KEY(cod_org_sup) REFERENCES orgao (cod_orgao);
+
+ALTER TABLE fato_cargo ADD FOREIGN KEY(cod_uorg) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_cargo ADD FOREIGN KEY(cod_org) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_cargo ADD FOREIGN KEY(cod_org_sup) REFERENCES orgao (cod_orgao);
+
+ALTER TABLE fato_vinculo ADD FOREIGN KEY(cod_uorg) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_vinculo ADD FOREIGN KEY(cod_org) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_vinculo ADD FOREIGN KEY(cod_org_sup) REFERENCES orgao (cod_orgao);
+
+ALTER TABLE fato_sem_cargo_funcao_vinculo ADD FOREIGN KEY(cod_uorg) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_sem_cargo_funcao_vinculo ADD FOREIGN KEY(cod_org) REFERENCES orgao (cod_orgao);
+ALTER TABLE fato_sem_cargo_funcao_vinculo ADD FOREIGN KEY(cod_org_sup) REFERENCES orgao (cod_orgao);
